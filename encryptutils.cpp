@@ -3,10 +3,12 @@
 //
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 
 #include "encryptutils.h"
 
+using namespace std;
 
 EncryptUtils::EncryptUtils() { }
 
@@ -17,7 +19,7 @@ byte_vec* EncryptUtils::encrypt(const byte_vec& plaintext, const Key& key, const
 
     // CFB mode must not use padding. Specifying
     //  a scheme will result in an exception
-    byte_vec* ciphertext = new std::vector<unsigned char>(plaintext.size());
+    byte_vec* ciphertext = new vector<unsigned char>(plaintext.size());
     ArraySink* arraysink = new ArraySink(ciphertext->data(), ciphertext->size());
     StreamTransformationFilter* transformer = new StreamTransformationFilter(e, arraysink);
 
@@ -29,12 +31,12 @@ byte_vec* EncryptUtils::encrypt(const byte_vec& plaintext, const Key& key, const
   }
   catch(const CryptoPP::Exception& e)
   {
-    std::cerr << e.what() << std::endl;
-    throw std::runtime_error { "Error encrypting" };
+    cerr << e.what() << endl;
+    throw runtime_error { "Error encrypting" };
   }
 }
 
-std::string EncryptUtils::encrypt(const std::string& plaintext, const Key& key, const IV& iv) {
+string EncryptUtils::encrypt(const string& plaintext, const Key& key, const IV& iv) {
   try {
     CFB_Mode< AES >::Encryption e;
     e.SetKeyWithIV(key.material, KEY_LENGTH, iv.material);
@@ -53,8 +55,8 @@ std::string EncryptUtils::encrypt(const std::string& plaintext, const Key& key, 
   }
   catch(const CryptoPP::Exception& e)
   {
-    std::cerr << e.what() << std::endl;
-    throw std::runtime_error { "Error encrypting" };
+    cerr << e.what() << endl;
+    throw runtime_error { "Error encrypting" };
   }
 }
 
@@ -66,7 +68,7 @@ byte_vec* EncryptUtils::decrypt(const byte_vec& ciphertext, const Key& key, cons
 
     // The StreamTransformationFilter removes
     //  padding as required.
-    byte_vec* plaintext = new std::vector<unsigned char>(ciphertext.size());
+    byte_vec* plaintext = new vector<unsigned char>(ciphertext.size());
     ArraySink* stringsink = new ArraySink(plaintext->data(), plaintext->size());
     Base64Decoder* b64decoder = new Base64Decoder(stringsink);
     StreamTransformationFilter* transformer = new StreamTransformationFilter(d, b64decoder);
@@ -77,18 +79,18 @@ byte_vec* EncryptUtils::decrypt(const byte_vec& ciphertext, const Key& key, cons
   }
   catch(const CryptoPP::Exception& e)
   {
-    std::cerr << e.what() << std::endl;
-    throw std::runtime_error { "Error decrypting" };
+    cerr << e.what() << endl;
+    throw runtime_error { "Error decrypting" };
   }
 }
 
-std::string EncryptUtils::decrypt(const std::string& ciphertext, const Key& key, const IV& iv) {
+string EncryptUtils::decrypt(const string& ciphertext, const Key& key, const IV& iv) {
   try
   {
     CFB_Mode< AES >::Decryption d;
     d.SetKeyWithIV(key.material, KEY_LENGTH, iv.material);
 
-    std::string plaintext, decoded;
+    string plaintext, decoded;
     StringSource(ciphertext, true,
                  new Base64Decoder(
                      new StringSink(decoded)
@@ -103,8 +105,8 @@ std::string EncryptUtils::decrypt(const std::string& ciphertext, const Key& key,
   }
   catch(const CryptoPP::Exception& e)
   {
-    std::cerr << e.what() << std::endl;
-    throw std::runtime_error { "Error decrypting" };
+    cerr << e.what() << endl;
+    throw runtime_error { "Error decrypting" };
   }
 }
 
