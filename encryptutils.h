@@ -7,13 +7,31 @@
 
 #include <string>
 #include <vector>
-#include <openssl/evp.h>
+#include <base64.h>
+#include <osrng.h>
+#include <cryptlib.h>
+#include <hex.h>
+#include <filters.h>
+#include <aes.h>
+#include <modes.h>
+
+using CryptoPP::AES;
+using CryptoPP::Exception;
+using CryptoPP::HexEncoder;
+using CryptoPP::HexDecoder;
+using CryptoPP::CFB_Mode;
+using CryptoPP::ArraySink;
+using CryptoPP::StringSink;
+using CryptoPP::StringSource;
+using CryptoPP::StreamTransformationFilter;
+using CryptoPP::AutoSeededRandomPool;
+using CryptoPP::Base64Encoder;
+using CryptoPP::Base64Decoder;
+using byte_vec = std::vector<unsigned char>;
 
 const int KEY_LENGTH = 32;
 const int IV_LENGTH = 16;
 const int AES_BLOCK_LENGTH = 16;
-
-using binary_vec = std::vector<unsigned char>;
 
 struct Key {
   unsigned char material[KEY_LENGTH];
@@ -27,10 +45,10 @@ class EncryptUtils {
 public:
   EncryptUtils();
 
-  binary_vec* encrypt(const char* plaintext, const Key& key, const IV& iv);
+  byte_vec* encrypt(const byte_vec& plaintext, const Key& key, const IV& iv);
   std::string encrypt(const std::string& plaintext, const Key& key, const IV& iv);
 
-  binary_vec* decrypt(const binary_vec& ciphertext, const Key& key, const IV& iv);
+  byte_vec* decrypt(const byte_vec& ciphertext, const Key& key, const IV& iv);
   std::string decrypt(const std::string& ciphertext, const Key& key, const IV& iv);
 
   Key* generate_key();
@@ -38,12 +56,7 @@ public:
 
   ~EncryptUtils() {}
 private:
-  void handle_error(EVP_CIPHER_CTX* ctx);
-  int ciphertext_len(int plaintext_len);
-
-  static std::string base64_encode(const binary_vec& buffer);
-  static binary_vec* base64_decode(const std::string& b64_string);
-  static unsigned long base64_decode_len(const std::string& b64_string);
+  AutoSeededRandomPool prng;
 };
 
 #endif //ENCRYPTUTILS_ENCRYPTUTILS_H

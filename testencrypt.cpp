@@ -18,9 +18,11 @@ int main(int argc, const char* argv[]) {
   Key* key = encrypter.generate_key();
   IV* iv = encrypter.generate_iv();
 
-  std::cout << "Input: " << to_encrypt << std::endl;
   std::string encrypted = encrypter.encrypt(to_encrypt, *key, *iv);
   std::cout << "Encrypted: " << encrypted << std::endl;
-  std::string decrypted = encrypter.decrypt(encrypted, *key, *iv);
-  std::cout << "Decrypted: " << decrypted << std::endl;
+  for (int i=0; i < 1000000; ++i) {
+    std::string decrypted = encrypter.decrypt(encrypted, *key, *iv);
+    if (i % 100000 == 0)
+      std::cout << "Decrypted: " << decrypted << std::endl;
+  }
 }
